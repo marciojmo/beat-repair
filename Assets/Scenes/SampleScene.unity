@@ -535,7 +535,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 14515d1c1483aba48854a9a07d8a6073, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerNumber: 2
+  playerNumber: 1
   inputEvent:
     m_PersistentCalls:
       m_Calls: []
@@ -929,7 +929,6 @@ GameObject:
   m_Component:
   - component: {fileID: 621177928}
   - component: {fileID: 621177929}
-  - component: {fileID: 621177930}
   m_Layer: 0
   m_Name: LevelController
   m_TagString: Untagged
@@ -963,50 +962,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8680e45f87835b04ea271eadf7f834cc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  song: {fileID: 11400000, guid: 19bee8b0333252a4aa3931574bf550a6, type: 2}
+  playersMorale: 0.5
+  playerSuccess: 
   punchDamage: 0.1
-  uiController: {fileID: 621177930}
---- !u!114 &621177930
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 621177927}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 665363b7fd381e34bb47a8786499626e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  moraleSlider: {fileID: 484449580}
-  buttonSprites:
-  - sprite: {fileID: 7824846735195912803, guid: d5c6eb798ddf72c47951cd82279af558,
-      type: 3}
-    noteType: 0
-  - sprite: {fileID: 1698913857484025728, guid: d5c6eb798ddf72c47951cd82279af558,
-      type: 3}
-    noteType: 1
-  - sprite: {fileID: 6026736956048933133, guid: d5c6eb798ddf72c47951cd82279af558,
-      type: 3}
-    noteType: 2
-  - sprite: {fileID: -585565523070132387, guid: d5c6eb798ddf72c47951cd82279af558,
-      type: 3}
-    noteType: 3
-  player1FillBorderImage: {fileID: 2059756275}
-  player1Buttons:
-  - {fileID: 547856481}
-  - {fileID: 63865084}
-  - {fileID: 1263390642}
-  - {fileID: 317615510}
-  - {fileID: 1127766410}
-  - {fileID: 1076709061}
-  player2FillBorderImage: {fileID: 1272149585}
-  player2Buttons:
-  - {fileID: 920007825}
-  - {fileID: 1934331172}
-  - {fileID: 1565081725}
-  - {fileID: 1231432859}
-  - {fileID: 512650403}
-  - {fileID: 1557814967}
+  uiController: {fileID: 0}
 --- !u!1 &627053680
 GameObject:
   m_ObjectHideFlags: 0
@@ -1476,7 +1436,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cb73ca4e3ba7fbd47a4ab804e5d82ed7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  song: {fileID: 11400000, guid: 19bee8b0333252a4aa3931574bf550a6, type: 2}
   gapMilis: 200
 --- !u!82 &1053725372
 AudioSource:
@@ -2498,7 +2457,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 14515d1c1483aba48854a9a07d8a6073, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerNumber: 1
+  playerNumber: 0
   inputEvent:
     m_PersistentCalls:
       m_Calls:
@@ -2525,8 +2484,9 @@ GameObject:
   - component: {fileID: 1757596907}
   - component: {fileID: 1757596906}
   - component: {fileID: 1757596905}
+  - component: {fileID: 1757596909}
   m_Layer: 5
-  m_Name: Canvas
+  m_Name: UIController
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2614,6 +2574,50 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!114 &1757596909
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1757596904}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 665363b7fd381e34bb47a8786499626e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  moraleSlider: {fileID: 484449580}
+  buttonSprites:
+  - noteType: 0
+    sprite: {fileID: 7824846735195912803, guid: d5c6eb798ddf72c47951cd82279af558,
+      type: 3}
+  - noteType: 1
+    sprite: {fileID: 1698913857484025728, guid: d5c6eb798ddf72c47951cd82279af558,
+      type: 3}
+  - noteType: 2
+    sprite: {fileID: 6026736956048933133, guid: d5c6eb798ddf72c47951cd82279af558,
+      type: 3}
+  - noteType: 3
+    sprite: {fileID: -585565523070132387, guid: d5c6eb798ddf72c47951cd82279af558,
+      type: 3}
+  playersBorders:
+  - {fileID: 2059756275}
+  - {fileID: 1272149585}
+  playersButtons:
+  - images:
+    - {fileID: 547856481}
+    - {fileID: 1076709061}
+    - {fileID: 1127766410}
+    - {fileID: 317615510}
+    - {fileID: 1263390642}
+    - {fileID: 63865084}
+  - images:
+    - {fileID: 920007825}
+    - {fileID: 1557814967}
+    - {fileID: 512650403}
+    - {fileID: 1231432859}
+    - {fileID: 1565081725}
+    - {fileID: 1934331172}
 --- !u!1 &1788375269
 GameObject:
   m_ObjectHideFlags: 0

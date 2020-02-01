@@ -9,45 +9,58 @@ public enum LevelState {
 }
 
 
-public class LevelController : MonoBehaviour {
+public class LevelController : Singleton<LevelController> {
+
+    public static int NUMBER_OF_PLAYERS = 2;
+    public static int NUMBER_OF_INITIAL_NOTES = 6;
+
     // Start is called before the first frame update
 
-    Queue<InputNote> _player1Notes, _player2Notes;
-    bool _player1Success, _player2Success;
-
-    private bool[] _ignoreInput = new bool[5];
-
+    public SongConfig song;
     /// From 0 to 1 /// Max player 1 = 1 /// Max Player 2 = 0 /// Middle = 0.5
-    float _playersMorale = 0.5f;
-    LevelState _currentState = LevelState.WAITING;
+    public float playersMorale = 0.5f;
+    public Queue<InputNote>[] playerNotes;
+    public bool[] playerSuccess;
+    private bool[] _ignoreInput;
+
+    
+    
 
     public float punchDamage = 0.1f;
     public UIController uiController;
+
+    private void Init()
+    {
+        playersMorale = 0.5f;
+
+        playerNotes = new Queue<InputNote>[NUMBER_OF_PLAYERS];
+        playerSuccess = new bool[NUMBER_OF_PLAYERS];
+        _ignoreInput = new bool[NUMBER_OF_PLAYERS];
+        for ( int i = 0; i < NUMBER_OF_PLAYERS; i++ )
+        {
+            playerNotes[i] = new Queue<InputNote>();
+        }
+
+        ResetIgnoreInput();
+    }
     
 
     void Start() {
-        _player1Notes = new Queue<InputNote>();
-        _player2Notes = new Queue<InputNote>();
 
-        ResetIgnoreInput();
-
+        // Initialize model data
+        Init();
+        
+        // Registers an observer for the beat ended event.
         MessageKit.addObserver( GameEvents.BEAT_ENDED, ProcessNotes );
 
+        // Spawn Initial notes
+        for (int p = 0; p < NUMBER_OF_PLAYERS; p++)
+            for (int i = 0; i < NUMBER_OF_INITIAL_NOTES; i++)
+                playerNotes[p].Enqueue(GetRandomNote());
 
-        for ( int i = 0; i < 6; i++ ) {
-            _player1Notes.Enqueue(GetRandomNote());
-            _player2Notes.Enqueue(GetRandomNote());
-        }
-
-        AudioController.Instance.Play();
+        // Let the party begin!
+        AudioController.Instance.Play(song);
     }
-
-    // Update is called once per frame
-    void Update() {
-        print(AudioController.Instance.GetCurrentBeatPercentage());
-        uiController.SetBorderFillValue( AudioController.Instance.GetCurrentBeatPercentage() );
-    }
-
 
     private void ResetIgnoreInput()
     {
@@ -58,117 +71,62 @@ public class LevelController : MonoBehaviour {
     public void OnNoteInput(int playerNumber, InputNote note) {
         print("player " + playerNumber + " pressed " + note);
 
-
         if ( AudioController.Instance.IsInAcceptZone() && !_ignoreInput[playerNumber] )
         {
             _ignoreInput[playerNumber] = true;
-            bool isNoteRight = CheckNote(playerNumber, note);
-            RegisterNote(playerNumber, isNoteRight);
+            playerSuccess[playerNumber] = (playerNotes[playerNumber].Peek() == note);
         }
         else
         {
             ProcessDirectHit(playerNumber);
         }
 
-
-        //switch ( _currentState ) {
-        //    case LevelState.WAITING:
-        //        //process wrong note
-        //        ProcessDirectHit(playerNumber);
-        //        break;
-        //    case LevelState.HITWINDOW:
-        //        bool isNoteRight = CheckNote(playerNumber, note);
-        //        RegisterNote(playerNumber, isNoteRight);                      
-        //        break;
-        //    default:
-        //        break;
-        //}
         //update notes queue
         UpdateNoteQueue(playerNumber);
 
     }
+    private void ProcessNotes()
+    {
 
-    private bool CheckNote(int playerNumber, InputNote note) {
-        if ( playerNumber == 1 ) {
-            if ( note == _player1Notes.Peek() ) {
-                return true;
-            }
-            return false;
-        } else {
-            if ( playerNumber == 2 ) {
-                if ( note == _player2Notes.Peek() ) {
-                    return true;
-                }
-                return false;
-            }
-        }
-        return false;
-    }
+        float moraleChange = 0f;
+        for ( int i = 0; i < NUMBER_OF_PLAYERS; i++ )
+        {
+            if (playerSuccess[i] == true)
+                moraleChange += GetMoraleModifier(i) * punchDamage;
 
-    private void RegisterNote(int playerNumber, bool isRight) {
-        if ( playerNumber == 1 ) {
-            if ( isRight ) {
-                _player1Success = true;
-            } else _player1Success = false;
+            UpdateNoteQueue(i);
         }
-        if ( playerNumber == 2 ) {
-            if ( isRight ) {
-                _player2Success = true;
-            } else _player2Success = false;
-        }
-    }
 
-    private void ProcessNotes() {
-        if (_player1Success && _player2Success) {
-            //ambos acertaram, empate
-            //animate
-        }
-        if ( _player1Success && !_player2Success ) {
-            //player 1 acertou
-            _playersMorale += punchDamage;
-            //animate
-        }
-        if ( !_player1Success && _player2Success ) {
-            //player 2 acertou
-            _playersMorale -= punchDamage;
-            //animate
-        }
-        if ( !_player1Success && !_player2Success ) {
-            //todos erraram, empate
-            //animate
-        }
-        //update ui
-        uiController.SetMoraleValue(_playersMorale);
-
-
+        UpdateMorale(moraleChange);
         ResetIgnoreInput();
+    }
+
+    private float GetMoraleModifier( int playerNumber )
+    {
+        return playerNumber == 0 ? 1f : -1f;
     }
 
     //when someone makes a mistake ant takes a hit
     public void ProcessDirectHit(int playerNumber) {
-        if ( playerNumber == 1 ) {
-            _playersMorale -= punchDamage;
-            //animate
-        } else {
-            _playersMorale += punchDamage;
-            //animate
-        }
-        //update ui
-        uiController.SetMoraleValue(_playersMorale);
+        // Adds a reverse punch damage on morale
+        UpdateMorale( -GetMoraleModifier(playerNumber) * punchDamage );
+        UpdateNoteQueue( playerNumber );
+
+        // TODO: update ui via messagekit
+        MessageKit.post(GameEvents.AUTO_HIT);
     }
 
-    private void UpdateNoteQueue(int playerNumber) {
-        InputNote newNote = GetRandomNote();
+    private void UpdateMorale( float moraleChange )
+    {
+        playersMorale += moraleChange;
+        MessageKit.post(GameEvents.MORALE_CHANGED);
+    }
 
-        if ( playerNumber == 1 ) {
-            _player1Notes.Dequeue();
-            _player1Notes.Enqueue(newNote);
-            uiController.UpdateButtons(true, _player1Notes);
-        } else {
-            _player2Notes.Dequeue();
-            _player2Notes.Enqueue(newNote);
-            uiController.UpdateButtons(false, _player2Notes);
-        }
+    private void UpdateNoteQueue(int playerNumber)
+    {
+        playerNotes[playerNumber].Dequeue();
+        playerNotes[playerNumber].Enqueue(GetRandomNote());
+        MessageKit.post(GameEvents.QUEUE_CHANGED);
     }
 
     private InputNote GetRandomNote() {

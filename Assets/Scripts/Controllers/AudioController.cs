@@ -9,7 +9,7 @@ using Prime31.MessageKit;
 public class AudioController : Singleton<AudioController>, IAudioController
 {
     // A reference to the sound that should be played
-    public SongConfig song;
+    //public SongConfig song;
 
     // The beat GAP (area in which the player can press the sample)
     public float gapMilis = 0.5f;
@@ -22,7 +22,7 @@ public class AudioController : Singleton<AudioController>, IAudioController
     private float _songFrequencyInverse = 1f;
     // The beats in samples
     private List<int> _beatsSamples;
-    private List<float> _beats;
+    private List<float> _beats = null;
     private float _milisPerSample;
     public void Awake()
     {
@@ -31,7 +31,7 @@ public class AudioController : Singleton<AudioController>, IAudioController
         Assert.IsNotNull(_audioSource, string.Format("Missing {0} on {1}", typeof(AudioSource).Name, typeof(AudioController).Name));
     }
 
-    public void Play()
+    public void Play( SongConfig song )
     {
         _audioSource.clip = song.clip;
         _beats = new List<float>();
@@ -47,19 +47,14 @@ public class AudioController : Singleton<AudioController>, IAudioController
         _audioSource.Play();
     }
 
-
-    //private int TimeToSample( float beatMilis )
-    //{
-    //    return (int) (beatMilis / _milisPerSample );
-
-    //}
-
     /// <summary>
     /// Returns the percentage of "readiness" of the current beat
     /// </summary>
     /// <returns>A number between zero and one representing the load of the current beat.</returns>
     public float GetCurrentBeatPercentage()
     {
+        if (_beats == null)
+            return 0f;
 
         if ( _currentBeatIndex >= _beats.Count)
             return 0f;
@@ -75,7 +70,7 @@ public class AudioController : Singleton<AudioController>, IAudioController
         // Current beat sample starts at the end of the sound (clip.samples)
         // or at the sample of the current beat
         // TODO: Add GAP?
-        float currentBeatTime = song.clip.length;
+        float currentBeatTime = _audioSource.clip.length;
         if ( _currentBeatIndex < _beats.Count )
             currentBeatTime = _beats[_currentBeatIndex] + 0.00001f;
 
@@ -110,6 +105,8 @@ public class AudioController : Singleton<AudioController>, IAudioController
 
     public void Update()
     {
+        if ( _beats == null )
+            return;
         //Debug.Log("Current Audio Sample: " + _audioSource.timeSamples);
         if ( _currentBeatIndex >= _beats.Count )
             return;

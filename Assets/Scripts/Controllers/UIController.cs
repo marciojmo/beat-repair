@@ -2,39 +2,60 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using Prime31.MessageKit;
 
 public class UIController : MonoBehaviour {
 
     [System.Serializable]
-    public struct NoteSprite {
-        public Sprite sprite;
+    public struct NoteSprite
+    {
         public InputNote noteType;
+        public Sprite sprite;
+    }
+
+    [System.Serializable]
+    public struct PlayerSequenceUI
+    {
+        public Image[] images;
     }
 
     public Slider moraleSlider;
     public NoteSprite[] buttonSprites;
+    public List<Image> playersBorders;
+    public List<PlayerSequenceUI> playersButtons;
 
-    [Header("Player 1")]
-    public Image player1FillBorderImage;
-    public Image[] player1Buttons;
+    private Dictionary<InputNote, Sprite> _buttonSpritesDictionary;
 
-    [Header("Player 2")]
-    public Image player2FillBorderImage;
-    public Image[] player2Buttons;
+    private void Awake()
+    {
 
-    private Dictionary<InputNote, Sprite> buttonSpritesDictionary;
+        // Initiazing note to sprite map.
+        _buttonSpritesDictionary = new Dictionary<InputNote, Sprite>();
+        for (int i = 0; i < buttonSprites.Length; i++)
+            _buttonSpritesDictionary.Add(buttonSprites[i].noteType, buttonSprites[i].sprite);
+
+    }
 
     // Start is called before the first frame update
     void Start() {
-        buttonSpritesDictionary = new Dictionary<InputNote, Sprite>();
-        for ( int i = 0; i < buttonSprites.Length; i++ ) {
-            buttonSpritesDictionary.Add(buttonSprites[i].noteType, buttonSprites[1].sprite);
-        }
+
+
+
+
+       MessageKit.addObserver(GameEvents.MORALE_CHANGED, () =>
+       {
+           SetMoraleValue(LevelController.Instance.playersMorale);
+       });
+
+        MessageKit.addObserver(GameEvents.QUEUE_CHANGED, () =>
+        {
+            UpdateQueue();
+        });
     }
 
     // Update is called once per frame
     void Update() {
-        
+        SetBorderFillValue(AudioController.Instance.GetCurrentBeatPercentage());
     }
 
     /// <summary>
@@ -52,19 +73,24 @@ public class UIController : MonoBehaviour {
     /// Value of fill from 0 to 1
     /// </summary>
     /// <param name="newValue"></param>
-    public void SetBorderFillValue(float newValue) {
-        player1FillBorderImage.fillAmount = newValue;
-        player2FillBorderImage.fillAmount = newValue;
+    public void SetBorderFillValue(float newValue)
+    {
+        for ( int i = 0; i < playersBorders.Count; i++ )
+        {
+            playersBorders[i].fillAmount = newValue;
+        }
     }
 
-    public void UpdateButtons(bool isPlayer1, Queue<InputNote> notes) {
-        if (isPlayer1) {
-            for ( int i = 0; i < player1Buttons.Length; i++ ) {
-                player1Buttons[i].sprite = buttonSpritesDictionary[notes.Dequeue()];
-            }
-        } else {
-            for ( int i = 0; i < player2Buttons.Length; i++ ) {
-                player2Buttons[i].sprite = buttonSpritesDictionary[notes.Dequeue()];
+    private void UpdateQueue()
+    {
+
+        for ( int i = 0; i < LevelController.NUMBER_OF_PLAYERS; i++ )
+        {
+            InputNote[] currentPlayerNotes = LevelController.Instance.playerNotes[i].ToArray();
+            for (int j = 0; j < LevelController.NUMBER_OF_INITIAL_NOTES; j++)
+            {
+                InputNote currentPlayerNote = currentPlayerNotes[j];
+                playersButtons[i].images[j].sprite = _buttonSpritesDictionary[ currentPlayerNote ];
             }
         }
     }
