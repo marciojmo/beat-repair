@@ -31,11 +31,6 @@ public class AudioController : Singleton<AudioController>, IAudioController
         Assert.IsNotNull(_audioSource, string.Format("Missing {0} on {1}", typeof(AudioSource).Name, typeof(AudioController).Name));
     }
 
-    void Start()
-    {
-        Play();
-    }
-
     public void Play()
     {
         _audioSource.clip = song.clip;

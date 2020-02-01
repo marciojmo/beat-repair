@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Prime31.MessageKit;
 
 public enum LevelState {
     WAITING,
@@ -13,6 +14,9 @@ public class LevelController : MonoBehaviour {
 
     Queue<InputNote> _player1Notes, _player2Notes;
     bool _player1Success, _player2Success;
+
+    private bool[] _ignoreInput = new bool[5];
+
     /// From 0 to 1 /// Max player 1 = 1 /// Max Player 2 = 0 /// Middle = 0.5
     float _playersMorale = 0.5f;
     LevelState _currentState = LevelState.WAITING;
@@ -25,42 +29,60 @@ public class LevelController : MonoBehaviour {
         _player1Notes = new Queue<InputNote>();
         _player2Notes = new Queue<InputNote>();
 
+        ResetIgnoreInput();
+
+        MessageKit.addObserver( GameEvents.BEAT_ENDED, ProcessNotes );
+
+
         for ( int i = 0; i < 6; i++ ) {
             _player1Notes.Enqueue(GetRandomNote());
             _player2Notes.Enqueue(GetRandomNote());
         }
+
+        AudioController.Instance.Play();
     }
 
     // Update is called once per frame
     void Update() {
+        print(AudioController.Instance.GetCurrentBeatPercentage());
+        uiController.SetBorderFillValue( AudioController.Instance.GetCurrentBeatPercentage() );
+    }
 
-        switch ( _currentState ) {
-            case LevelState.WAITING:
-                //updates fill barrs
-                //uiController.SetBorderFillValue( porcentagem de progresso ate o proximo beat );
-                break;
-            case LevelState.HITWINDOW:
-                break;
-            default:
-                break;
-        }
+
+    private void ResetIgnoreInput()
+    {
+        for (int i = 0; i < _ignoreInput.Length; i++)
+            _ignoreInput[i] = false;
     }
 
     public void OnNoteInput(int playerNumber, InputNote note) {
         print("player " + playerNumber + " pressed " + note);
 
-        switch ( _currentState ) {
-            case LevelState.WAITING:
-                //process wrong note
-                ProcessDirectHit(playerNumber);
-                break;
-            case LevelState.HITWINDOW:
-                bool isNoteRight = CheckNote(playerNumber, note);
-                RegisterNote(playerNumber, isNoteRight);                      
-                break;
-            default:
-                break;
+
+        if ( AudioController.Instance.IsInAcceptZone() && !_ignoreInput[playerNumber] )
+        {
+            _ignoreInput[playerNumber] = true;
+            bool isNoteRight = CheckNote(playerNumber, note);
+            RegisterNote(playerNumber, isNoteRight);
         }
+        else
+        {
+            ProcessDirectHit(playerNumber);
+        }
+
+
+        //switch ( _currentState ) {
+        //    case LevelState.WAITING:
+        //        //process wrong note
+        //        ProcessDirectHit(playerNumber);
+        //        break;
+        //    case LevelState.HITWINDOW:
+        //        bool isNoteRight = CheckNote(playerNumber, note);
+        //        RegisterNote(playerNumber, isNoteRight);                      
+        //        break;
+        //    default:
+        //        break;
+        //}
         //update notes queue
         UpdateNoteQueue(playerNumber);
 
@@ -117,6 +139,9 @@ public class LevelController : MonoBehaviour {
         }
         //update ui
         uiController.SetMoraleValue(_playersMorale);
+
+
+        ResetIgnoreInput();
     }
 
     //when someone makes a mistake ant takes a hit

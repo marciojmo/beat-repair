@@ -53,8 +53,8 @@ public class UIController : MonoBehaviour {
     /// </summary>
     /// <param name="newValue"></param>
     public void SetBorderFillValue(float newValue) {
-        player1FillBorderImage.fillAmount += newValue;
-        player2FillBorderImage.fillAmount += newValue;
+        player1FillBorderImage.fillAmount = newValue;
+        player2FillBorderImage.fillAmount = newValue;
     }
 
     public void UpdateButtons(bool isPlayer1, Queue<InputNote> notes) {
