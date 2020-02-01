@@ -34,7 +34,7 @@ public class UIController : MonoBehaviour {
 
     // Update is called once per frame
     void Update() {
-
+        
     }
 
     /// <summary>
@@ -43,14 +43,9 @@ public class UIController : MonoBehaviour {
     /// Max Player 2 = 0
     /// Middle = 0.5
     /// </summary>
-    /// <param name="isPlayer1">Wether the value is to be added to player 1</param>
     /// <param name="newValue"></param>
-    public void SetMoraleValue(bool isPlayer1, float newValue) {
-        if ( isPlayer1 ) {
-            moraleSlider.value += newValue;
-        } else {
-            moraleSlider.value -= newValue;
-        }
+    public void SetMoraleValue(float newValue) {
+            moraleSlider.value = newValue;
     }
 
     /// <summary>
@@ -62,7 +57,7 @@ public class UIController : MonoBehaviour {
         player2FillBorderImage.fillAmount += newValue;
     }
 
-    public void OnUpdateButtons(bool isPlayer1, Queue<InputNote> notes) {
+    public void UpdateButtons(bool isPlayer1, Queue<InputNote> notes) {
         if (isPlayer1) {
             for ( int i = 0; i < player1Buttons.Length; i++ ) {
                 player1Buttons[i].sprite = buttonSpritesDictionary[notes.Dequeue()];

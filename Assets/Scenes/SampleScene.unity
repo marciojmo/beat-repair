@@ -963,6 +963,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8680e45f87835b04ea271eadf7f834cc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  punchDamage: 0.1
+  uiController: {fileID: 621177930}
 --- !u!114 &621177930
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -975,14 +977,36 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 665363b7fd381e34bb47a8786499626e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moraleSlider: {fileID: 0}
+  moraleSlider: {fileID: 484449580}
   buttonSprites:
-  - sprite: {fileID: 0}
+  - sprite: {fileID: 7824846735195912803, guid: d5c6eb798ddf72c47951cd82279af558,
+      type: 3}
     noteType: 0
-  player1FillBorderImage: {fileID: 0}
-  player1Buttons: []
-  player2FillBorderImage: {fileID: 0}
-  player2Buttons: []
+  - sprite: {fileID: 1698913857484025728, guid: d5c6eb798ddf72c47951cd82279af558,
+      type: 3}
+    noteType: 1
+  - sprite: {fileID: 6026736956048933133, guid: d5c6eb798ddf72c47951cd82279af558,
+      type: 3}
+    noteType: 2
+  - sprite: {fileID: -585565523070132387, guid: d5c6eb798ddf72c47951cd82279af558,
+      type: 3}
+    noteType: 3
+  player1FillBorderImage: {fileID: 2059756275}
+  player1Buttons:
+  - {fileID: 547856481}
+  - {fileID: 63865084}
+  - {fileID: 1263390642}
+  - {fileID: 317615510}
+  - {fileID: 1127766410}
+  - {fileID: 1076709061}
+  player2FillBorderImage: {fileID: 1272149585}
+  player2Buttons:
+  - {fileID: 920007825}
+  - {fileID: 1934331172}
+  - {fileID: 1565081725}
+  - {fileID: 1231432859}
+  - {fileID: 512650403}
+  - {fileID: 1557814967}
 --- !u!1 &627053680
 GameObject:
   m_ObjectHideFlags: 0
