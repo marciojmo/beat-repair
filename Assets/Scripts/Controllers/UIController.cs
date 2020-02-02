@@ -5,6 +5,7 @@ using UnityEngine.UI;
 using Prime31.MessageKit;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
+using TMPro;
 
 public class UIController : MonoBehaviour
 {
@@ -32,7 +33,7 @@ public class UIController : MonoBehaviour
     public Color failColor, disabledColor;
     public float resetColorTime;
     public GameObject endGameScreen;
-    public TextMesh endgameText;
+    public TextMeshProUGUI endgameText;
     public GameObject endGameButton;
     public EventSystem eventSystem;
 
@@ -63,7 +64,6 @@ public class UIController : MonoBehaviour
         });
 
         MessageKit.addObserver(GameEvents.GAME_OVER, () => {
-            Debug.Break();
             OnEndGame();
         });
     }
@@ -178,6 +178,15 @@ public class UIController : MonoBehaviour
 
     public void OnEndGame() {
         endGameScreen.SetActive(true);
+
+        if ( LevelController.Instance.playersMorale > 0.5 ) {
+            endgameText.text = "PLAYER 1 WINS!";
+        } else if ( LevelController.Instance.playersMorale < 0.5 ) {
+            endgameText.text = "PLAYER 2 WINS!";
+        } else {
+            endgameText.text = "NOBODY WINS!";
+        }
+
         eventSystem.SetSelectedGameObject(endGameButton);
     }
 
