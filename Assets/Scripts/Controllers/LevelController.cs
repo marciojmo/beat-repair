@@ -23,8 +23,7 @@ public class LevelController : Singleton<LevelController> {
     public bool[] playerSuccess;
     public bool[] playerMiss;
     private bool[] _ignoreInput;
-
-
+    public bool[] playerDirectHit;
 
 
     public float punchDamage = 0.1f;
@@ -89,6 +88,7 @@ public class LevelController : Singleton<LevelController> {
         if ( AudioController.Instance.IsInAcceptZone() ) {
             _ignoreInput[playerNumber] = true;
             playerSuccess[playerNumber] = (playerNotes[playerNumber].Peek() == note);
+
         } else {
             ProcessDirectHit(playerNumber);
         }
@@ -107,34 +107,41 @@ public class LevelController : Singleton<LevelController> {
         }
 
         //check animations
-        if ( playerSuccess[0] && playerSuccess[1] ) {
+        if (playerSuccess[0] && playerSuccess[1]) {
             //draw //random attack/defense
-            if ( Random.Range((int)0, (int)2) == 0 ) {
+            if (Random.Range(0f, 1f) > 0.5f) {
                 MessageKit.post(GameEvents.P1_PUNCH);
                 MessageKit.post(GameEvents.P2_DEFENSE);
             } else {
                 MessageKit.post(GameEvents.P2_PUNCH);
                 MessageKit.post(GameEvents.P1_DEFENSE);
             }
-        } else {
-            if ( playerSuccess[0] && !playerSuccess[1] ) {
-                //player 1 hits
-                MessageKit.post(GameEvents.P1_PUNCH);
-                MessageKit.post(GameEvents.P2_DAMAGE);
-            } else {
-                if ( !playerSuccess[0] && playerSuccess[1] ) {
-                    //player 2 hits
-                    MessageKit.post(GameEvents.P2_PUNCH);
-                    MessageKit.post(GameEvents.P1_DAMAGE);
-                } else {
-                    if ( !playerSuccess[0] && !playerSuccess[1] ) {
-                        //both missed
-                        MessageKit.post(GameEvents.P1_CONFUSION);
-                        MessageKit.post(GameEvents.P2_CONFUSION);
-                    }
-                }
-            }
         }
+        else if (playerSuccess[0] && !playerSuccess[1])
+        {
+            //player 1 hits
+            MessageKit.post(GameEvents.P1_PUNCH);
+            MessageKit.post(GameEvents.P2_DAMAGE);
+        }
+        else if (!playerSuccess[0] && playerSuccess[1])
+        {
+            //player 2 hits
+            MessageKit.post(GameEvents.P2_PUNCH);
+            MessageKit.post(GameEvents.P1_DAMAGE);
+        }
+        else
+        {
+            //both missed
+            MessageKit.post(GameEvents.P1_CONFUSION);
+            MessageKit.post(GameEvents.P2_CONFUSION);
+        }
+
+
+        if (_ignoreInput[0] && playerSuccess[0] == false && playerMiss[0] == false)
+            MessageKit.post(GameEvents.P1_MISS);
+        if (_ignoreInput[1] && playerSuccess[1] == false && playerMiss[1] == false)
+            MessageKit.post(GameEvents.P2_MISS);
+
 
         UpdateMorale(moraleChange);
         ResetPlayerSuccess();
@@ -162,16 +169,16 @@ public class LevelController : Singleton<LevelController> {
     //when someone makes a mistake ant takes a hit
     public void ProcessDirectHit(int playerNumber) {
 
-        // avoids reprocessing a "miss"
-        if (playerMiss[playerNumber] == true)
-            return;
-
         // Adds a reverse punch damage on morale
         UpdateMorale(-GetMoraleModifier(playerNumber) * punchDamage);
         //UpdateNoteQueue(playerNumber);
         playerMiss[playerNumber] = true;
-        // TODO: update ui via messagekit
-        MessageKit.post(GameEvents.AUTO_HIT);
+
+        if (playerNumber == 0)
+            MessageKit.post(GameEvents.P1_MISS);
+        else
+            MessageKit.post(GameEvents.P2_MISS);
+
     }
 
     private void UpdateMorale(float moraleChange) {
