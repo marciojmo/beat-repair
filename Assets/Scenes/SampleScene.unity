@@ -1410,6 +1410,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8680e45f87835b04ea271eadf7f834cc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  availableSongs:
+  - {fileID: 11400000, guid: 19bee8b0333252a4aa3931574bf550a6, type: 2}
+  - {fileID: 11400000, guid: f5dadb6b51202c14b9402b0a04d31656, type: 2}
   song: {fileID: 11400000, guid: 19bee8b0333252a4aa3931574bf550a6, type: 2}
   playersMorale: 0.5
   playerSuccess: 
