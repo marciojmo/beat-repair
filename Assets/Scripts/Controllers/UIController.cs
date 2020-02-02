@@ -76,7 +76,6 @@ public class UIController : MonoBehaviour
         playersParticles[0].gameObject.SetActive(true);
         playersParticles[0].Play();
         playersSuccessSongs[0].Play();
-        playersLolSongs[0].Play();
         // TODO: tocar som
         //Debug.Break();
     }
@@ -86,8 +85,7 @@ public class UIController : MonoBehaviour
         playersParticles[1].gameObject.SetActive(false);
         playersParticles[1].gameObject.SetActive(true);
         playersParticles[1].Play();
-        playersSuccessSongs[1].Play();
-        playersLolSongs[1].Play();
+        playersSuccessSongs[1].Play();        
         // TODO: tocar som
         //Debug.Break();
     }
@@ -189,6 +187,8 @@ public class UIController : MonoBehaviour
 
     public void OnEndGame() {
         endGameScreen.SetActive(true);
+
+        playersLolSongs[1].Play();
 
         if ( LevelController.Instance.playersMorale > 0.5 ) {
             endgameText.text = "PLAYER 1 WINS!";
