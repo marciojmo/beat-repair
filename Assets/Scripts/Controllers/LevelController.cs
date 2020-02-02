@@ -23,107 +23,97 @@ public class LevelController : Singleton<LevelController> {
     public bool[] playerSuccess;
     private bool[] _ignoreInput;
 
-    
-    
+
+
 
     public float punchDamage = 0.1f;
     public UIController uiController;
 
-    private void Init()
-    {
+    private void Init() {
         playersMorale = 0.5f;
 
         playerNotes = new Queue<InputNote>[NUMBER_OF_PLAYERS];
         playerSuccess = new bool[NUMBER_OF_PLAYERS];
         _ignoreInput = new bool[NUMBER_OF_PLAYERS];
-        for ( int i = 0; i < NUMBER_OF_PLAYERS; i++ )
-        {
+        for ( int i = 0; i < NUMBER_OF_PLAYERS; i++ ) {
             playerNotes[i] = new Queue<InputNote>();
         }
 
         ResetIgnoreInput();
     }
-    
+
 
     void Start() {
 
         // Initialize model data
         Init();
-        
+
         // Registers an observer for the beat ended event.
-        MessageKit.addObserver( GameEvents.BEAT_ENDED, ProcessNotes );
+        MessageKit.addObserver(GameEvents.BEAT_ENDED, ProcessNotes);
 
         // Spawn Initial notes
-        for (int p = 0; p < NUMBER_OF_PLAYERS; p++)
-            for (int i = 0; i < NUMBER_OF_INITIAL_NOTES; i++)
+        for ( int p = 0; p < NUMBER_OF_PLAYERS; p++ )
+            for ( int i = 0; i < NUMBER_OF_INITIAL_NOTES; i++ )
                 playerNotes[p].Enqueue(GetRandomNote());
 
         // Let the party begin!
         AudioController.Instance.Play(song);
     }
 
-    private void ResetIgnoreInput()
-    {
-        for (int i = 0; i < _ignoreInput.Length; i++)
+    private void ResetIgnoreInput() {
+        for ( int i = 0; i < _ignoreInput.Length; i++ )
             _ignoreInput[i] = false;
     }
 
     public void OnNoteInput(int playerNumber, InputNote note) {
         print("player " + playerNumber + " pressed " + note);
 
-        if ( AudioController.Instance.IsInAcceptZone() && !_ignoreInput[playerNumber] )
-        {
+        if ( AudioController.Instance.IsInAcceptZone() && !_ignoreInput[playerNumber] ) {
             _ignoreInput[playerNumber] = true;
             playerSuccess[playerNumber] = (playerNotes[playerNumber].Peek() == note);
-        }
-        else
-        {
+        } else {
             ProcessDirectHit(playerNumber);
         }
 
         //update notes queue
-        UpdateNoteQueue(playerNumber);
-
+        //UpdateNoteQueue(playerNumber);
     }
-    private void ProcessNotes()
-    {
+    private void ProcessNotes() {
 
         float moraleChange = 0f;
-        for ( int i = 0; i < NUMBER_OF_PLAYERS; i++ )
-        {
-            if (playerSuccess[i] == true)
+        for ( int i = 0; i < NUMBER_OF_PLAYERS; i++ ) {
+            if ( playerSuccess[i] == true ) {
                 moraleChange += GetMoraleModifier(i) * punchDamage;
+                print("acertou o " + i);
+            }                
 
-            UpdateNoteQueue(i);
+           UpdateNoteQueue(i);
         }
 
         UpdateMorale(moraleChange);
         ResetIgnoreInput();
     }
 
-    private float GetMoraleModifier( int playerNumber )
-    {
+    private float GetMoraleModifier(int playerNumber) {
         return playerNumber == 0 ? 1f : -1f;
     }
 
     //when someone makes a mistake ant takes a hit
     public void ProcessDirectHit(int playerNumber) {
         // Adds a reverse punch damage on morale
-        UpdateMorale( -GetMoraleModifier(playerNumber) * punchDamage );
-        UpdateNoteQueue( playerNumber );
+        UpdateMorale(-GetMoraleModifier(playerNumber) * punchDamage);
+        UpdateNoteQueue(playerNumber);
 
         // TODO: update ui via messagekit
         MessageKit.post(GameEvents.AUTO_HIT);
     }
 
-    private void UpdateMorale( float moraleChange )
-    {
+    private void UpdateMorale(float moraleChange) {
         playersMorale += moraleChange;
         MessageKit.post(GameEvents.MORALE_CHANGED);
     }
 
-    private void UpdateNoteQueue(int playerNumber)
-    {
+    private void UpdateNoteQueue(int playerNumber) {
         playerNotes[playerNumber].Dequeue();
         playerNotes[playerNumber].Enqueue(GetRandomNote());
         MessageKit.post(GameEvents.QUEUE_CHANGED);

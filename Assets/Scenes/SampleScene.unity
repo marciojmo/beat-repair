@@ -522,7 +522,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &494366808
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -538,7 +538,18 @@ MonoBehaviour:
   playerNumber: 1
   inputEvent:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 621177929}
+        m_MethodName: OnNoteInput
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &494366809
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2606,18 +2617,18 @@ MonoBehaviour:
   playersButtons:
   - images:
     - {fileID: 547856481}
-    - {fileID: 1076709061}
-    - {fileID: 1127766410}
-    - {fileID: 317615510}
-    - {fileID: 1263390642}
     - {fileID: 63865084}
+    - {fileID: 1263390642}
+    - {fileID: 317615510}
+    - {fileID: 1127766410}
+    - {fileID: 1076709061}
   - images:
     - {fileID: 920007825}
-    - {fileID: 1557814967}
-    - {fileID: 512650403}
-    - {fileID: 1231432859}
-    - {fileID: 1565081725}
     - {fileID: 1934331172}
+    - {fileID: 1565081725}
+    - {fileID: 1231432859}
+    - {fileID: 512650403}
+    - {fileID: 1557814967}
 --- !u!1 &1788375269
 GameObject:
   m_ObjectHideFlags: 0
@@ -2912,7 +2923,7 @@ MonoBehaviour:
   m_PreserveAspect: 1
   m_FillCenter: 1
   m_FillMethod: 4
-  m_FillAmount: 0.383
+  m_FillAmount: 0.155
   m_FillClockwise: 1
   m_FillOrigin: 2
   m_UseSpriteMesh: 0
