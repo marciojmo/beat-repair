@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using Prime31.MessageKit;
+using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
 
 public class UIController : MonoBehaviour
 {
@@ -28,6 +30,10 @@ public class UIController : MonoBehaviour
     public AudioClip[] playersParticlesSounds;
     public Color failColor, disabledColor;
     public float resetColorTime;
+    public GameObject endGameScreen;
+    public TextMesh endgameText;
+    public GameObject endGameButton;
+    public EventSystem eventSystem;
 
     private Dictionary<InputNote, Sprite> _buttonSpritesDictionary;
 
@@ -53,6 +59,11 @@ public class UIController : MonoBehaviour
 
         MessageKit.addObserver(GameEvents.RESTORE_COLOR, () => {
             ResetButtonColor();
+        });
+
+        MessageKit.addObserver(GameEvents.GAME_OVER, () => {
+            Debug.Break();
+            OnEndGame();
         });
     }
 
@@ -174,6 +185,15 @@ public class UIController : MonoBehaviour
         for ( int i = 0; i < playersButtons.Count; i++ ) {
             playersButtons[i].images[0].color = Color.white;
         }        
+    }
+
+    public void OnEndGame() {
+        endGameScreen.SetActive(true);
+        eventSystem.SetSelectedGameObject(endGameButton);
+    }
+
+    public void OnBackToMenu() {
+        SceneManager.LoadScene("MainMenu");
     }
 
 }
