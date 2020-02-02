@@ -27,7 +27,8 @@ public class UIController : MonoBehaviour
     public List<Image> playersBorders;
     public List<PlayerSequenceUI> playersButtons;
     public ParticleSystem[] playersParticles;
-    public AudioClip[] playersParticlesSounds;
+    public AudioSource[] playersSuccessSongs;
+    public AudioSource[] playersFailureSongs;
     public Color failColor, disabledColor;
     public float resetColorTime;
     public GameObject endGameScreen;
@@ -69,52 +70,50 @@ public class UIController : MonoBehaviour
 
     void PlayPlayer1Success()
     {
+        playersParticles[0].gameObject.SetActive(false);
+        playersParticles[0].gameObject.SetActive(true);
         playersParticles[0].Play();
+        playersSuccessSongs[0].Play();
         // TODO: tocar som
         //Debug.Break();
     }
 
     void PlayPlayer2Success()
     {
+        playersParticles[1].gameObject.SetActive(false);
+        playersParticles[1].gameObject.SetActive(true);
         playersParticles[1].Play();
+        playersSuccessSongs[1].Play();
         // TODO: tocar som
         //Debug.Break();
+    }
+
+    void PlayPlayer1Failure()
+    {
+        playersFailureSongs[0].Play();
+    }
+
+    void PlayPlayer2Failure()
+    {
+        playersFailureSongs[1].Play();
     }
 
 
     private void Start()
     {
-        MessageKit.addObserver(GameEvents.P2_DAMAGE, PlayPlayer1Success );
-        MessageKit.addObserver(GameEvents.P1_DAMAGE, PlayPlayer2Success);
+        MessageKit.addObserver( GameEvents.P2_DAMAGE, PlayPlayer1Success );
+        MessageKit.addObserver( GameEvents.P1_DAMAGE, PlayPlayer2Success );
+
+        MessageKit.addObserver(GameEvents.P1_MISS, PlayPlayer1Failure);
+        MessageKit.addObserver(GameEvents.P2_MISS, PlayPlayer2Failure);
     }
 
-    private bool _sliderBlinkTriggered = false;
-    private bool _sliderBlinkCancelled = false;
-    IEnumerator BlinkSlider()
-    {
-        while(true)
-        {
-            for( int i = 0; i < LevelController.NUMBER_OF_PLAYERS; i++ )
-            {
-                playersBorders[i].enabled = !playersBorders[i].enabled;
-            }
-            yield return new WaitForSeconds(0.1f);
-        }
-    }
     // Update is called once per frame
     void Update() {
         float percent = AudioController.Instance.GetCurrentBeatPercentage();
-
         
         if ( AudioController.Instance.IsInAcceptZone() )
         {
-            if (!_sliderBlinkTriggered)
-            {
-                _sliderBlinkTriggered = true;
-                _sliderBlinkCancelled = false;
-                //StartCoroutine("BlinkSlider");
-            }
-
             for (int i = 0; i < LevelController.NUMBER_OF_PLAYERS; i++)
             {
                 if ( LevelController.Instance.playerMiss[i] )
@@ -126,16 +125,6 @@ public class UIController : MonoBehaviour
         }
         else
         {
-
-            if (!_sliderBlinkCancelled)
-            {
-                _sliderBlinkCancelled = true;
-                _sliderBlinkTriggered = false;
-                //StopCoroutine("BlinkSlider");
-                for (int i = 0; i < LevelController.NUMBER_OF_PLAYERS; i++)
-                    playersBorders[i].enabled = true;
-            }
-
             for (int i = 0; i < LevelController.NUMBER_OF_PLAYERS; i++)
             {
                 if (LevelController.Instance.playerMiss[i])
