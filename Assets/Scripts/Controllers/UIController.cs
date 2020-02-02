@@ -29,6 +29,7 @@ public class UIController : MonoBehaviour
     public List<PlayerSequenceUI> playersButtons;
     public ParticleSystem[] playersParticles;
     public AudioSource[] playersSuccessSongs;
+    public AudioSource[] playersLolSongs;
     public AudioSource[] playersFailureSongs;
     public Color failColor, disabledColor;
     public float resetColorTime;
@@ -36,6 +37,7 @@ public class UIController : MonoBehaviour
     public TextMeshProUGUI endgameText;
     public GameObject endGameButton;
     public EventSystem eventSystem;
+    public AudioSource vaia;
 
     private Dictionary<InputNote, Sprite> _buttonSpritesDictionary;
 
@@ -74,6 +76,7 @@ public class UIController : MonoBehaviour
         playersParticles[0].gameObject.SetActive(true);
         playersParticles[0].Play();
         playersSuccessSongs[0].Play();
+        playersLolSongs[0].Play();
         // TODO: tocar som
         //Debug.Break();
     }
@@ -84,6 +87,7 @@ public class UIController : MonoBehaviour
         playersParticles[1].gameObject.SetActive(true);
         playersParticles[1].Play();
         playersSuccessSongs[1].Play();
+        playersLolSongs[1].Play();
         // TODO: tocar som
         //Debug.Break();
     }
@@ -98,14 +102,21 @@ public class UIController : MonoBehaviour
         playersFailureSongs[1].Play();
     }
 
+    void PlayVaia()
+    {
+        vaia.Play();
+    }
 
     private void Start()
     {
         MessageKit.addObserver( GameEvents.P2_DAMAGE, PlayPlayer1Success );
         MessageKit.addObserver( GameEvents.P1_DAMAGE, PlayPlayer2Success );
 
+
         MessageKit.addObserver(GameEvents.P1_MISS, PlayPlayer1Failure);
         MessageKit.addObserver(GameEvents.P2_MISS, PlayPlayer2Failure);
+
+        MessageKit.addObserver(GameEvents.CONFUSION, PlayVaia);
     }
 
     // Update is called once per frame

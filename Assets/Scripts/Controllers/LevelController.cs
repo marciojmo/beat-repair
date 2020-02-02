@@ -134,6 +134,7 @@ public class LevelController : Singleton<LevelController> {
             //both missed
             MessageKit.post(GameEvents.P1_CONFUSION);
             MessageKit.post(GameEvents.P2_CONFUSION);
+            MessageKit.post(GameEvents.CONFUSION);
         }
 
 

@@ -24,7 +24,8 @@ public class GameEvents
     public const int P2_CONFUSION = 1600;
     public const int END_OF_BEATS = 1700;
     public const int GAME_OVER = 1800;
-    
+    public const int CONFUSION = 2000;
+
 
 
 }
