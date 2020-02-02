@@ -175,9 +175,16 @@ public class LevelController : Singleton<LevelController> {
         playerMiss[playerNumber] = true;
 
         if (playerNumber == 0)
+        {
+            MessageKit.post(GameEvents.P1_AUTO_HIT);
             MessageKit.post(GameEvents.P1_MISS);
+        }
         else
+        {
+            MessageKit.post(GameEvents.P2_AUTO_HIT);
             MessageKit.post(GameEvents.P2_MISS);
+        }
+            
 
     }
 
