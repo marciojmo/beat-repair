@@ -16,6 +16,8 @@ public class LevelController : Singleton<LevelController> {
 
     // Start is called before the first frame update
 
+    public SongConfig[] availableSongs;
+
     public SongConfig song;
     /// From 0 to 1 /// Max player 1 = 1 /// Max Player 2 = 0 /// Middle = 0.5
     public float playersMorale = 0.5f;
@@ -39,6 +41,8 @@ public class LevelController : Singleton<LevelController> {
         for ( int i = 0; i < NUMBER_OF_PLAYERS; i++ ) {
             playerNotes[i] = new Queue<InputNote>();
         }
+
+        song = availableSongs[Random.Range(0, 2)];
         
         ResetIgnoreInput();
     }
