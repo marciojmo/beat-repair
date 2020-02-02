@@ -108,7 +108,7 @@ public class AudioController : Singleton<AudioController>, IAudioController
         if ( _beats == null )
             return;
         //Debug.Log("Current Audio Sample: " + _audioSource.timeSamples);
-        if ( _currentBeatIndex >= _beats.Count )
+        if (_currentBeatIndex >= _beats.Count)
             return;
 
         float currentSongTimeMilis = GetCurrentSongTimeMilis();
@@ -122,6 +122,17 @@ public class AudioController : Singleton<AudioController>, IAudioController
         {
             _currentBeatIndex++;
             MessageKit.post(GameEvents.BEAT_ENDED);
+
+            if (_currentBeatIndex >= _beats.Count)
+            {
+                MessageKit.post(GameEvents.END_OF_BEATS);
+            }
+        }
+
+        if ( _audioSource.clip != null && _audioSource.timeSamples >= _audioSource.clip.samples )
+        {
+            _audioSource.clip = null;
+            MessageKit.post(GameEvents.GAME_OVER);
         }
     }
 

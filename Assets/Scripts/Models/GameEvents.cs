@@ -20,6 +20,8 @@ public class GameEvents
     public const int P2_DEFENSE = 1400;
     public const int P1_CONFUSION = 1500;
     public const int P2_CONFUSION = 1600;
+    public const int END_OF_BEATS = 1700;
+    public const int GAME_OVER = 1800;
 
 
 }

@@ -53,12 +53,21 @@ public class LevelController : Singleton<LevelController> {
         // Registers an observer for the beat ended event.
         MessageKit.addObserver(GameEvents.BEAT_ENDED, ProcessNotes);
 
+        MessageKit.addObserver( GameEvents.END_OF_BEATS, () => {
+            for (int i = 0; i < NUMBER_OF_PLAYERS; i++)
+            {
+                _ignoreInput[i] = true;
+            }
+        });
+
         // Spawn Initial notes
         for ( int p = 0; p < NUMBER_OF_PLAYERS; p++ )
             for ( int i = 0; i < NUMBER_OF_INITIAL_NOTES; i++ )
                 playerNotes[p].Enqueue(GetRandomNote());
 
         MessageKit.post(GameEvents.QUEUE_CHANGED);
+
+        
 
         // Let the party begin!
         AudioController.Instance.Play(song);
@@ -72,7 +81,12 @@ public class LevelController : Singleton<LevelController> {
     public void OnNoteInput(int playerNumber, InputNote note) {
         print("player " + playerNumber + " pressed " + note);
 
-        if ( AudioController.Instance.IsInAcceptZone() && !_ignoreInput[playerNumber] ) {
+        if (_ignoreInput[playerNumber])
+            return;
+
+        _ignoreInput[playerNumber] = true;
+
+        if ( AudioController.Instance.IsInAcceptZone() ) {
             _ignoreInput[playerNumber] = true;
             playerSuccess[playerNumber] = (playerNotes[playerNumber].Peek() == note);
         } else {
@@ -147,9 +161,14 @@ public class LevelController : Singleton<LevelController> {
 
     //when someone makes a mistake ant takes a hit
     public void ProcessDirectHit(int playerNumber) {
+
+        // avoids reprocessing a "miss"
+        if (playerMiss[playerNumber] == true)
+            return;
+
         // Adds a reverse punch damage on morale
         UpdateMorale(-GetMoraleModifier(playerNumber) * punchDamage);
-        UpdateNoteQueue(playerNumber);
+        //UpdateNoteQueue(playerNumber);
         playerMiss[playerNumber] = true;
         // TODO: update ui via messagekit
         MessageKit.post(GameEvents.AUTO_HIT);
@@ -157,6 +176,7 @@ public class LevelController : Singleton<LevelController> {
 
     private void UpdateMorale(float moraleChange) {
         playersMorale += moraleChange;
+        playersMorale = Mathf.Clamp( playersMorale, 0f, 1f );
         MessageKit.post(GameEvents.MORALE_CHANGED);
     }
 

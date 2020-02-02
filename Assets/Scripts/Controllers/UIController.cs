@@ -25,10 +25,12 @@ public class UIController : MonoBehaviour
     public List<Image> playersBorders;
     public List<PlayerSequenceUI> playersButtons;
     public ParticleSystem[] playersParticles;
-    public Color failColor;
+    public AudioClip[] playersParticlesSounds;
+    public Color failColor, disabledColor;
     public float resetColorTime;
 
     private Dictionary<InputNote, Sprite> _buttonSpritesDictionary;
+
 
     private void Awake() {
 
@@ -45,18 +47,93 @@ public class UIController : MonoBehaviour
             UpdateQueue();
         });
 
-        MessageKit.addObserver(GameEvents.AUTO_HIT, () => {
-            PaintNoteRed();
-        });
+        //MessageKit.addObserver(GameEvents.AUTO_HIT, () => {
+        //    PaintNoteRed();
+        //});
 
         MessageKit.addObserver(GameEvents.RESTORE_COLOR, () => {
             ResetButtonColor();
         });
     }
 
+    void PlayPlayer1Success()
+    {
+        playersParticles[0].Play();
+        // TODO: tocar som
+        //Debug.Break();
+    }
+
+    void PlayPlayer2Success()
+    {
+        playersParticles[1].Play();
+        // TODO: tocar som
+        //Debug.Break();
+    }
+
+
+    private void Start()
+    {
+        MessageKit.addObserver(GameEvents.P2_DAMAGE, PlayPlayer1Success );
+        MessageKit.addObserver(GameEvents.P1_DAMAGE, PlayPlayer2Success);
+    }
+
+    private bool _sliderBlinkTriggered = false;
+    private bool _sliderBlinkCancelled = false;
+    IEnumerator BlinkSlider()
+    {
+        while(true)
+        {
+            for( int i = 0; i < LevelController.NUMBER_OF_PLAYERS; i++ )
+            {
+                playersBorders[i].enabled = !playersBorders[i].enabled;
+            }
+            yield return new WaitForSeconds(0.1f);
+        }
+    }
     // Update is called once per frame
     void Update() {
         float percent = AudioController.Instance.GetCurrentBeatPercentage();
+
+        
+        if ( AudioController.Instance.IsInAcceptZone() )
+        {
+            if (!_sliderBlinkTriggered)
+            {
+                _sliderBlinkTriggered = true;
+                _sliderBlinkCancelled = false;
+                //StartCoroutine("BlinkSlider");
+            }
+
+            for (int i = 0; i < LevelController.NUMBER_OF_PLAYERS; i++)
+            {
+                if ( LevelController.Instance.playerMiss[i] )
+                    playersButtons[i].images[0].color = failColor;
+                else
+                    playersButtons[i].images[0].color = Color.white;
+            }
+            //percent = 1f; // forcing slider percent to 1 when in accept zone
+        }
+        else
+        {
+
+            if (!_sliderBlinkCancelled)
+            {
+                _sliderBlinkCancelled = true;
+                _sliderBlinkTriggered = false;
+                //StopCoroutine("BlinkSlider");
+                for (int i = 0; i < LevelController.NUMBER_OF_PLAYERS; i++)
+                    playersBorders[i].enabled = true;
+            }
+
+            for (int i = 0; i < LevelController.NUMBER_OF_PLAYERS; i++)
+            {
+                if (LevelController.Instance.playerMiss[i])
+                    playersButtons[i].images[0].color = failColor;
+                else
+                    playersButtons[i].images[0].color = disabledColor;
+            }
+            
+        }
         SetBorderFillValue(percent);
         //SetBorderFillValue(1 - (1 - 0) * Mathf.Log(Time.deltaTime, percent));
     }
@@ -93,28 +170,10 @@ public class UIController : MonoBehaviour
         }
     }
 
-    private void PaintNoteRed() {
-        for ( int i = 0; i < LevelController.NUMBER_OF_PLAYERS; i++ ) {
-            if ( LevelController.Instance.playerMiss[i]) {
-                playersButtons[i].images[0].color = failColor;
-            }
-        }
-        Invoke("ResetButtonColor", resetColorTime);
-    }
-
     private void ResetButtonColor() {
         for ( int i = 0; i < playersButtons.Count; i++ ) {
             playersButtons[i].images[0].color = Color.white;
         }        
     }
-
-    private void PlayParticles() {
-        for ( int i = 0; i < LevelController.NUMBER_OF_PLAYERS; i++ ) {
-            if ( LevelController.Instance.playerSuccess[i] ) {
-                playersParticles[i].Play();
-            }
-        }        
-    }
-
 
 }
