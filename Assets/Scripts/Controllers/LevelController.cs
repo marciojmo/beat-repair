@@ -21,6 +21,7 @@ public class LevelController : Singleton<LevelController> {
     public float playersMorale = 0.5f;
     public Queue<InputNote>[] playerNotes;
     public bool[] playerSuccess;
+    public bool[] playerMiss;
     private bool[] _ignoreInput;
 
 
@@ -34,11 +35,12 @@ public class LevelController : Singleton<LevelController> {
 
         playerNotes = new Queue<InputNote>[NUMBER_OF_PLAYERS];
         playerSuccess = new bool[NUMBER_OF_PLAYERS];
+        playerMiss = new bool[NUMBER_OF_PLAYERS];
         _ignoreInput = new bool[NUMBER_OF_PLAYERS];
         for ( int i = 0; i < NUMBER_OF_PLAYERS; i++ ) {
             playerNotes[i] = new Queue<InputNote>();
         }
-
+        
         ResetIgnoreInput();
     }
 
@@ -55,6 +57,8 @@ public class LevelController : Singleton<LevelController> {
         for ( int p = 0; p < NUMBER_OF_PLAYERS; p++ )
             for ( int i = 0; i < NUMBER_OF_INITIAL_NOTES; i++ )
                 playerNotes[p].Enqueue(GetRandomNote());
+
+        MessageKit.post(GameEvents.QUEUE_CHANGED);
 
         // Let the party begin!
         AudioController.Instance.Play(song);
@@ -84,15 +88,58 @@ public class LevelController : Singleton<LevelController> {
         for ( int i = 0; i < NUMBER_OF_PLAYERS; i++ ) {
             if ( playerSuccess[i] == true ) {
                 moraleChange += GetMoraleModifier(i) * punchDamage;
-                print("acertou o " + i);
             }                
-
            UpdateNoteQueue(i);
         }
 
+        //check animations
+        if ( playerSuccess[0] && playerSuccess[1] ) {
+            //draw //random attack/defense
+            if ( Random.Range((int)0, (int)2) == 0 ) {
+                MessageKit.post(GameEvents.P1_PUNCH);
+                MessageKit.post(GameEvents.P2_DEFENSE);
+            } else {
+                MessageKit.post(GameEvents.P2_PUNCH);
+                MessageKit.post(GameEvents.P1_DEFENSE);
+            }
+        } else {
+            if ( playerSuccess[0] && !playerSuccess[1] ) {
+                //player 1 hits
+                MessageKit.post(GameEvents.P1_PUNCH);
+                MessageKit.post(GameEvents.P2_DAMAGE);
+            } else {
+                if ( !playerSuccess[0] && playerSuccess[1] ) {
+                    //player 2 hits
+                    MessageKit.post(GameEvents.P2_PUNCH);
+                    MessageKit.post(GameEvents.P1_DAMAGE);
+                } else {
+                    if ( !playerSuccess[0] && !playerSuccess[1] ) {
+                        //both missed
+                        MessageKit.post(GameEvents.P1_CONFUSION);
+                        MessageKit.post(GameEvents.P2_CONFUSION);
+                    }
+                }
+            }
+        }
+
         UpdateMorale(moraleChange);
+        ResetPlayerSuccess();
+        ResetPlayerMiss();
         ResetIgnoreInput();
+        MessageKit.post(GameEvents.RESTORE_COLOR);
     }
+
+    private void ResetPlayerSuccess() {
+        for ( int i = 0; i < NUMBER_OF_PLAYERS; i++ ) {
+            playerSuccess[i] = false;
+        }
+    }
+
+    private void ResetPlayerMiss() {
+        for ( int i = 0; i < NUMBER_OF_PLAYERS; i++ ) {
+            playerMiss[i] = false;
+        }
+    }    
 
     private float GetMoraleModifier(int playerNumber) {
         return playerNumber == 0 ? 1f : -1f;
@@ -103,7 +150,7 @@ public class LevelController : Singleton<LevelController> {
         // Adds a reverse punch damage on morale
         UpdateMorale(-GetMoraleModifier(playerNumber) * punchDamage);
         UpdateNoteQueue(playerNumber);
-
+        playerMiss[playerNumber] = true;
         // TODO: update ui via messagekit
         MessageKit.post(GameEvents.AUTO_HIT);
     }

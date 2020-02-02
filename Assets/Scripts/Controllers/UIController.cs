@@ -24,6 +24,9 @@ public class UIController : MonoBehaviour
     public NoteSprite[] buttonSprites;
     public List<Image> playersBorders;
     public List<PlayerSequenceUI> playersButtons;
+    public ParticleSystem[] playersParticles;
+    public Color failColor;
+    public float resetColorTime;
 
     private Dictionary<InputNote, Sprite> _buttonSpritesDictionary;
 
@@ -34,17 +37,20 @@ public class UIController : MonoBehaviour
         for ( int i = 0; i < buttonSprites.Length; i++ )
             _buttonSpritesDictionary.Add(buttonSprites[i].noteType, buttonSprites[i].sprite);
 
-    }
-
-    // Start is called before the first frame update
-    void Start() {
-
-        MessageKit.addObserver(GameEvents.MORALE_CHANGED, () => {
+            MessageKit.addObserver(GameEvents.MORALE_CHANGED, () => {
             SetMoraleValue(LevelController.Instance.playersMorale);
         });
 
         MessageKit.addObserver(GameEvents.QUEUE_CHANGED, () => {
             UpdateQueue();
+        });
+
+        MessageKit.addObserver(GameEvents.AUTO_HIT, () => {
+            PaintNoteRed();
+        });
+
+        MessageKit.addObserver(GameEvents.RESTORE_COLOR, () => {
+            ResetButtonColor();
         });
     }
 
@@ -86,5 +92,29 @@ public class UIController : MonoBehaviour
             }
         }
     }
+
+    private void PaintNoteRed() {
+        for ( int i = 0; i < LevelController.NUMBER_OF_PLAYERS; i++ ) {
+            if ( LevelController.Instance.playerMiss[i]) {
+                playersButtons[i].images[0].color = failColor;
+            }
+        }
+        Invoke("ResetButtonColor", resetColorTime);
+    }
+
+    private void ResetButtonColor() {
+        for ( int i = 0; i < playersButtons.Count; i++ ) {
+            playersButtons[i].images[0].color = Color.white;
+        }        
+    }
+
+    private void PlayParticles() {
+        for ( int i = 0; i < LevelController.NUMBER_OF_PLAYERS; i++ ) {
+            if ( LevelController.Instance.playerSuccess[i] ) {
+                playersParticles[i].Play();
+            }
+        }        
+    }
+
 
 }
