@@ -24,23 +24,20 @@ public class AudioController : Singleton<AudioController>, IAudioController
     private List<int> _beatsSamples;
     private List<float> _beats = null;
     private float _milisPerSample;
-    public void Awake()
-    {
+    public void Awake() {
         // Initializing references...
         _audioSource = GetComponent<AudioSource>();
         Assert.IsNotNull(_audioSource, string.Format("Missing {0} on {1}", typeof(AudioSource).Name, typeof(AudioController).Name));
     }
 
-    public void Play( SongConfig song )
-    {
+    public void Play(SongConfig song) {
         _audioSource.clip = song.clip;
         _beats = new List<float>();
         _currentBeatIndex = 0;
         _songFrequencyInverse = 1f / song.clip.frequency;
 
         // Converting string time to samples
-        for (int i = 0; i < song.beats.Count; i++)
-        {
+        for ( int i = 0; i < song.beats.Count; i++ ) {
             float beatMilis = SongConfig.StrTimeToMilis(song.beats[i]);
             _beats.Add(beatMilis);
         }
@@ -51,12 +48,11 @@ public class AudioController : Singleton<AudioController>, IAudioController
     /// Returns the percentage of "readiness" of the current beat
     /// </summary>
     /// <returns>A number between zero and one representing the load of the current beat.</returns>
-    public float GetCurrentBeatPercentage()
-    {
-        if (_beats == null)
+    public float GetCurrentBeatPercentage() {
+        if ( _beats == null )
             return 0f;
 
-        if ( _currentBeatIndex >= _beats.Count)
+        if ( _currentBeatIndex >= _beats.Count )
             return 0f;
 
 
@@ -64,7 +60,7 @@ public class AudioController : Singleton<AudioController>, IAudioController
         // at the sample of the previous beat.
         // TODO: Add GAP?
         float lastBeatTime = 0f;
-        if (_currentBeatIndex > 0)
+        if ( _currentBeatIndex > 0 )
             lastBeatTime = _beats[_currentBeatIndex - 1];
 
         // Current beat sample starts at the end of the sound (clip.samples)
@@ -77,34 +73,31 @@ public class AudioController : Singleton<AudioController>, IAudioController
         float currentSongTime = GetCurrentSongTimeMilis();
 
         // Returns the relative distance for the current beat.
-        float totalDistance = Mathf.Abs( currentBeatTime - lastBeatTime);
-        float currentDistance = Mathf.Abs( currentSongTime - lastBeatTime );
-        return Mathf.Clamp( currentDistance / totalDistance, 0f, 1f );
+        float totalDistance = Mathf.Abs(currentBeatTime - lastBeatTime);
+        float currentDistance = Mathf.Abs(currentSongTime - lastBeatTime);
+        return Mathf.Clamp(currentDistance / totalDistance, 0f, 1f);
     }
 
     /// <summary>
     /// Indicates whether or not the current beat is in the accept zone
     /// </summary>
     /// <returns>True if the current beat is in the accept zone, False othewise.</returns>
-    public bool IsInAcceptZone()
-    {
+    public bool IsInAcceptZone() {
 
         if ( _currentBeatIndex >= _beats.Count )
             return false;
 
         float currentBeatSample = _beats[_currentBeatIndex];
         float songBeatSample = GetCurrentSongTimeMilis();
-        return ( songBeatSample >= currentBeatSample - gapMilis && songBeatSample <= currentBeatSample + gapMilis );
+        return (songBeatSample >= currentBeatSample - gapMilis && songBeatSample <= currentBeatSample + gapMilis);
     }
 
 
-    private float GetCurrentSongTimeMilis()
-    {
+    private float GetCurrentSongTimeMilis() {
         return _audioSource.timeSamples * _songFrequencyInverse * 1000f;
     }
 
-    public void Update()
-    {
+    public void Update() {
         if ( _beats == null )
             return;
 
@@ -114,7 +107,7 @@ public class AudioController : Singleton<AudioController>, IAudioController
         }
 
         //Debug.Log("Current Audio Sample: " + _audioSource.timeSamples);
-        if (_currentBeatIndex >= _beats.Count)
+        if ( _currentBeatIndex >= _beats.Count )
             return;
 
         float currentSongTimeMilis = GetCurrentSongTimeMilis();
@@ -124,16 +117,14 @@ public class AudioController : Singleton<AudioController>, IAudioController
         //print("Current beat: " + currentBeatTimeMilis);
         //print("Current time: " + currentSongTimeMilis );
 
-        if ( currentSongTimeMilis > currentBeatWindowMaxMilis )
-        {
+        if ( currentSongTimeMilis > currentBeatWindowMaxMilis ) {
             _currentBeatIndex++;
             MessageKit.post(GameEvents.BEAT_ENDED);
 
-            if (_currentBeatIndex >= _beats.Count)
-            {
+            if ( _currentBeatIndex >= _beats.Count ) {
                 MessageKit.post(GameEvents.END_OF_BEATS);
             }
-        }        
+        }
     }
 
 

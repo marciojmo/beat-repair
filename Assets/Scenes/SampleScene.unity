@@ -1419,7 +1419,7 @@ MonoBehaviour:
   playerMiss: 
   playerDirectHit: 
   punchDamage: 0.1
-  uiController: {fileID: 0}
+  uiController: {fileID: 1757596909}
 --- !u!1 &627053680
 GameObject:
   m_ObjectHideFlags: 0
